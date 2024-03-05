@@ -2,7 +2,3 @@
 	path = zlib
 	url = https://github.com/madler/zlib
 	ignore = all
-[submodule "yahoo_answers"]
-	path = yahoo_answers
-	url = https://huggingface.co/datasets/yahoo_answers_topics
-	ignore = all

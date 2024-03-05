@@ -1,17 +1,17 @@
-all: zlib_dylib yahoo_answers_dataset build
+all: zlib_dylib build
 
 zlib_dylib:
 	cd zlib && sh ./configure && make all
 	mv ./zlib/libz.dylib .
 	cd zlib && make clean
 
-yahoo_answers_dataset:
-	echo "TODO"
-
 build:
+	@echo Building
 	mkdir build
-	cd build && mojo build ../main.mojo
+	mojo build main.mojo -o build/mojo_zlib_classifier
 
 clean:
 	rm -rf build
 
+love:
+	@echo not war

@@ -58,6 +58,9 @@ dkms.conf
 venv/
 .venv/
 
+# build
+build/
+
 
 # local tests
 zlib_python.mojo
