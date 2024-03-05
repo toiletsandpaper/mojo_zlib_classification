@@ -17,7 +17,7 @@ alias Bytef = Scalar[DType.int8]
 alias uLong = UInt64
 alias zlib_type = fn(
     _out: Pointer[Bytef], 
-    _out_len: Pointer[UInt64], 
+    _out_len: Pointer[uLong], 
     _in: Pointer[Bytef], 
     _in_len: uLong
 ) -> Int

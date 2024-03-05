@@ -53,3 +53,12 @@ dkms.conf
 
 # dylibs
 *.dylib
+
+# Python
+venv/
+.venv/
+
+
+# local tests
+zlib_python.mojo
+zlib_test.py
