@@ -63,5 +63,7 @@ build/
 
 
 # local tests
-zlib_python.mojo
 zlib_test.py
+
+# datasets
+*.csv
