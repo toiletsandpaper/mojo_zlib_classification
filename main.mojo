@@ -3,7 +3,7 @@ from python import Python
 from collections.vector import InlinedFixedVector
 from collections.optional import Optional
 
-from zlib import compress, uncompress, ZlibResultType
+from zlib import compress, uncompress, ZlibResultType, uLong, Bytef
 
 
 struct YahooRecord(CollectionElement, Stringable):
@@ -85,10 +85,9 @@ fn main() raises:
                 record.question_title = question_title.replace('"', '')
                 record.question_content = question_content.replace('"', '')
                 record.best_answer = best_answer.replace('"', '')
-                # FIXME: doesnt work, some weird error when casting String to StringLiteral
-                var a = StringLiteral.__init__(question_title)
                 record.compressed_all_text = compress(
-                    StringLiteral(question_title))
+                    String(' ').join(question_title, question_content, best_answer),
+                    logging=False
                 )
 
                 # Sometimes one of this works, sometimes nothing works at all
@@ -97,7 +96,12 @@ fn main() raises:
                 # record.all_text = question_title + question_content + best_answer
                 # record.all_text = String(' ').join(question_title, question_content, best_answer)
                 yahoo_dataset.append(record)
-            except:
-                print('skiping unparsable line: ' + line[])
+            except err:
+                print('Error' + str(err) + 'skiping unparsable line: ' + line[])
         for i in range(10):
             print(yahoo_dataset[i])
+            var compressed_len: uLong = yahoo_dataset[i].compressed_all_text.value().get[1, Pointer[uLong]]().load(0)
+            var compressed_data_ptr: Pointer[Bytef] = yahoo_dataset[i].compressed_all_text.value().get[0, Pointer[Bytef]]()
+            for j in range(compressed_len):
+                print_no_newline(hex(compressed_data_ptr.load(j)))
+            print()
