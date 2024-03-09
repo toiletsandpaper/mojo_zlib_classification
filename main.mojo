@@ -13,7 +13,7 @@ struct YahooRecord(CollectionElement, Stringable):
     var question_content: String
     var best_answer: String
     # var all_text: String
-    var compressed_all_text: Optional[ZlibResultType]
+    var compressed_all_text: DynamicVector[Bytef]
 
     fn __init__(inout self):
         # self.id = id
@@ -28,7 +28,7 @@ struct YahooRecord(CollectionElement, Stringable):
         self.question_content = ""
         self.best_answer = ""
         # self.all_text = ""
-        self.compressed_all_text = None
+        self.compressed_all_text = DynamicVector[Bytef]()
         
 
     fn __copyinit__(inout self: Self, borrowed other: Self):
@@ -48,6 +48,7 @@ struct YahooRecord(CollectionElement, Stringable):
         self.compressed_all_text = other.compressed_all_text
 
     fn __str__(self) -> String:
+        
         return (
             "YahooRecord(id="
             + String(self.id)
@@ -61,6 +62,9 @@ struct YahooRecord(CollectionElement, Stringable):
             + self.best_answer
             # + ', all_text='
             # + self.all_text
+            # + ', compressed=['
+            # + String(',').join(self.compressed_all_text)
+            # + ']'
             + ")"
         )
 
@@ -85,10 +89,14 @@ fn main() raises:
                 record.question_title = question_title.replace('"', '')
                 record.question_content = question_content.replace('"', '')
                 record.best_answer = best_answer.replace('"', '')
-                record.compressed_all_text = compress(
+                var compres_res =  compress(
                     String(' ').join(question_title, question_content, best_answer),
                     logging=False
                 )
+                var compressed_len: uLong = compres_res.get[1, Pointer[uLong]]().load(0)
+                var compressed_data_ptr: Pointer[Bytef] = compres_res.get[0, Pointer[Bytef]]()
+                for j in range(compressed_len):
+                    record.compressed_all_text.append(compressed_data_ptr.load(j))
 
                 # Sometimes one of this works, sometimes nothing works at all
                 # idk what causing this, maybe unclosed `file` when error raised? 
@@ -97,11 +105,11 @@ fn main() raises:
                 # record.all_text = String(' ').join(question_title, question_content, best_answer)
                 yahoo_dataset.append(record)
             except err:
-                print('Error' + str(err) + 'skiping unparsable line: ' + line[])
+                print('Error ' + str(err) + '; skiping unparsable line: ' + line[])
         for i in range(10):
             print(yahoo_dataset[i])
-            var compressed_len: uLong = yahoo_dataset[i].compressed_all_text.value().get[1, Pointer[uLong]]().load(0)
-            var compressed_data_ptr: Pointer[Bytef] = yahoo_dataset[i].compressed_all_text.value().get[0, Pointer[Bytef]]()
-            for j in range(compressed_len):
-                print_no_newline(hex(compressed_data_ptr.load(j)))
+            # var compressed_len: uLong = yahoo_dataset[i].compressed_all_text.value().get[1, Pointer[uLong]]().load(0)
+            # var compressed_data_ptr: Pointer[Bytef] = yahoo_dataset[i].compressed_all_text.value().get[0, Pointer[Bytef]]()
+            # for j in range(compressed_len):
+            #     print_no_newline(hex(compressed_data_ptr.load(j)))
             print()
