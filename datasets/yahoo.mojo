@@ -3,6 +3,7 @@ from pathlib import Path
 
 alias YahooDataset = DynamicVector[YahooRecord]
 
+@value
 struct YahooRecord(CollectionElement, Stringable):
     var id: UInt64
     var topic: UInt8
@@ -66,11 +67,20 @@ fn load_dataset(yahoo_path: Path) raises -> YahooDataset:
     var yahoo_dataset = YahooDataset()
     var max_vector_length: UInt32 = 0
     with open(yahoo_path, "r") as file:
-        for line in file.read().split("\n"):
+        print('Started loading', yahoo_path, 'file')
+        var lines = file.read().split("\n")
+        print('File', yahoo_path, 'loaded and splitted in lines')
+        var readed = 0
+        var last_readed: Float64 = 0.0
+        for i in range(len(lines)):
             try:
-                if line[] == '':
+                var readed_percentage = readed / len(lines) * 100
+                if readed_percentage - last_readed > 2:
+                    last_readed = readed_percentage
+                    print_no_newline(str(readed / len(lines) * 100) + '% of file preprocessed      \r')
+                if lines[i] == '':
                     raise Error('blank line')
-                var col = line[].split(",")
+                var col = lines[i].split(",")
 
                 var id = col[0]
                 var topic = col[1]
@@ -97,7 +107,9 @@ fn load_dataset(yahoo_path: Path) raises -> YahooDataset:
                 yahoo_dataset.append(record)
                 max_vector_length = math.max(max_vector_length, len(record.compressed_all_text))
             except err:
-                print('Error ' + str(err) + '; skiping unparsable line: ' + line[])
+                print()
+                print('Error ' + str(err) + '; skiping unparsable line: ' + lines[i])
+            readed = readed + 1
     for row in yahoo_dataset:
         var row_len = len(row[].compressed_all_text)
         if UInt32(row_len) < max_vector_length:

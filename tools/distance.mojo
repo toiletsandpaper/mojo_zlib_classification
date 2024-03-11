@@ -7,13 +7,9 @@ fn euclidian(
     vec2: DynamicVector[Int8], 
     dim: Optional[Int] = None
 ) -> Float64:
-    # XXX: why does this is still a Optional after `or_else`?
-    # var _dim = dim.or_else(
-    #     math.min(len(vec1), len(vec2))
-    # )
     var out_sum: Float64 = 0
     for i in range(dim.or_else(math.min(len(vec1), len(vec2))).value()):
-        print('Int1:', vec1[i], '\nFloat1:',  vec1[i].cast[DType.float64]())
+        # print('Int1:', vec1[i], '\nFloat1:',  vec1[i].cast[DType.float64]())
         out_sum = out_sum + (vec1[i].cast[DType.float64]() - vec2[i].cast[DType.float64]())**2
     return math.sqrt(out_sum)
     
