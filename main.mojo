@@ -8,6 +8,7 @@ from datasets.yahoo import YahooDataset, YahooRecord, load_dataset
 
 
 fn main() raises:
-    var yahoo_dataset = load_dataset('datasets/yahoo_test.csv')
+    var yahoo_dataset = load_dataset('datasets/yahoo_train.csv')
+    #var data_tensor = 
     for rec in range(10):
-        print(yahoo_dataset[rec])
+        print(yahoo_dataset[rec], len(yahoo_dataset[rec].compressed_all_text))

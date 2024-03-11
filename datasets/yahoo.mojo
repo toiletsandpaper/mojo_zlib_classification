@@ -10,6 +10,7 @@ struct YahooRecord(CollectionElement, Stringable):
     var question_content: String
     var best_answer: String
     var compressed_all_text: DynamicVector[Bytef]
+    # TODO: var fixed_data_len: SIMD[DType.int8, 2048]
 
     fn __init__(inout self):
         self.id = 0
@@ -63,6 +64,7 @@ struct YahooRecord(CollectionElement, Stringable):
 
 fn load_dataset(yahoo_path: Path) raises -> YahooDataset:
     var yahoo_dataset = YahooDataset()
+    var max_vector_length: UInt32 = 0
     with open(yahoo_path, "r") as file:
         for line in file.read().split("\n"):
             try:
@@ -93,6 +95,14 @@ fn load_dataset(yahoo_path: Path) raises -> YahooDataset:
                 for j in range(compressed_len):
                     record.compressed_all_text.append(compressed_data_ptr.load(j))
                 yahoo_dataset.append(record)
+                max_vector_length = math.max(max_vector_length, len(record.compressed_all_text))
             except err:
                 print('Error ' + str(err) + '; skiping unparsable line: ' + line[])
+    for row in yahoo_dataset:
+        var row_len = len(row[].compressed_all_text)
+        if UInt32(row_len) < max_vector_length:
+            for i in range(max_vector_length - row_len):
+                row[].compressed_all_text.append(0)
+        elif UInt32(row_len) > max_vector_length:
+            raise Error('vector of row is larger than related var somehow')
     return yahoo_dataset
