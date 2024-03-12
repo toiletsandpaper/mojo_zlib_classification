@@ -1,5 +1,7 @@
-from tools.zlib import uLong, Bytef, compress, uncompress
 from pathlib import Path
+from tensor import Tensor
+
+from tools.zlib import uLong, Bytef, compress, uncompress
 
 alias YahooDataset = DynamicVector[YahooRecord]
 
@@ -10,7 +12,7 @@ struct YahooRecord(CollectionElement, Stringable):
     var question_title: String
     var question_content: String
     var best_answer: String
-    var compressed_all_text: DynamicVector[Bytef]
+    var compressed_all_text: Tensor[DType.int16]
     # TODO: var fixed_data_len: SIMD[DType.int8, 2048]
 
     fn __init__(inout self):
@@ -19,7 +21,7 @@ struct YahooRecord(CollectionElement, Stringable):
         self.question_title = ""
         self.question_content = ""
         self.best_answer = ""
-        self.compressed_all_text = DynamicVector[Bytef]()
+        self.compressed_all_text = Tensor[DType.int16](2048)
         
 
     fn __copyinit__(inout self: Self, borrowed other: Self):
@@ -53,10 +55,11 @@ struct YahooRecord(CollectionElement, Stringable):
             + self.best_answer
         )
 
-        var second_part: String = ', compressed=['
-        for el in self.compressed_all_text:
-            second_part = second_part + String(el[]) + ', '
-        second_part = second_part[:-2] + ']'
+        var second_part: String = ', compressed='
+        second_part = second_part + String(self.compressed_all_text)
+        # for el in self.compressed_all_text:
+        #     second_part = second_part + String(el[]) + ', '
+        # second_part = second_part[:-2] + ']'
 
         var last_part: String = ')'
         return (
@@ -77,7 +80,7 @@ fn load_dataset(yahoo_path: Path) raises -> YahooDataset:
                 var readed_percentage = readed / len(lines) * 100
                 if readed_percentage - last_readed > 2:
                     last_readed = readed_percentage
-                    print_no_newline(str(readed / len(lines) * 100) + '% of file preprocessed      \r')
+                    print_no_newline(str((readed / len(lines) * 100).cast[DType.int8]()) + '% of file preprocessed      \r')
                 if lines[i] == '':
                     raise Error('blank line')
                 var col = lines[i].split(",")
@@ -103,18 +106,18 @@ fn load_dataset(yahoo_path: Path) raises -> YahooDataset:
                 var compressed_len: uLong = compres_res.get[1, Pointer[uLong]]().load(0)
                 var compressed_data_ptr: Pointer[Bytef] = compres_res.get[0, Pointer[Bytef]]()
                 for j in range(compressed_len):
-                    record.compressed_all_text.append(compressed_data_ptr.load(j))
+                    record.compressed_all_text[j] = compressed_data_ptr.load(j).cast[DType.int16]()
                 yahoo_dataset.append(record)
-                max_vector_length = math.max(max_vector_length, len(record.compressed_all_text))
+                max_vector_length = math.max(max_vector_length, record.compressed_all_text.num_elements())
             except err:
                 print()
                 print('Error ' + str(err) + '; skiping unparsable line: ' + lines[i])
             readed = readed + 1
-    for row in yahoo_dataset:
-        var row_len = len(row[].compressed_all_text)
-        if UInt32(row_len) < max_vector_length:
-            for i in range(max_vector_length - row_len):
-                row[].compressed_all_text.append(0)
-        elif UInt32(row_len) > max_vector_length:
-            raise Error('vector of row is larger than related var somehow')
+    # for row in yahoo_dataset:
+    #     var row_len = row[].compressed_all_text.num_elements
+    #     if UInt32(row_len) < max_vector_length:
+    #         for i in range(max_vector_length - row_len):
+    #             row[].compressed_all_text.append(0)
+    #     elif UInt32(row_len) > max_vector_length:
+    #         raise Error('vector of row is larger than related var somehow')
     return yahoo_dataset
