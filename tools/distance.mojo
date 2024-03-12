@@ -17,7 +17,7 @@ fn reduce_power2_sum[type: DType](tensor: Tensor[type]) -> SIMD[type, 1]:
             accumulator += tensor.simd_load[simd_width](i) ** 2
         else:
             # Handle tail elements when the tensor size isn't a multiple of simd_width.
-            accumulator[0] += tensor.simd_load[width](i).reduce_add() ** 2
+            accumulator[0] += (tensor.simd_load[width](i) ** 2).reduce_add()
 
     vectorize[reduce_power_and_sum, simd_width, 1](tensor.num_elements())
     # reduce the vector of sums to a scalar
