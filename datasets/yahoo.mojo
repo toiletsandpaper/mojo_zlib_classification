@@ -80,7 +80,7 @@ fn load_dataset(yahoo_path: Path) raises -> YahooDataset:
                 var readed_percentage = readed / len(lines) * 100
                 if readed_percentage - last_readed > 2:
                     last_readed = readed_percentage
-                    print_no_newline(str((readed / len(lines) * 100).cast[DType.int8]()) + '% of file preprocessed      \r')
+                    print_no_newline(str((readed_percentage).cast[DType.int8]()) + '% of file preprocessed      \r')
                 if lines[i] == '':
                     raise Error('blank line')
                 var col = lines[i].split(",")
@@ -113,11 +113,4 @@ fn load_dataset(yahoo_path: Path) raises -> YahooDataset:
                 print()
                 print('Error ' + str(err) + '; skiping unparsable line: ' + lines[i])
             readed = readed + 1
-    # for row in yahoo_dataset:
-    #     var row_len = row[].compressed_all_text.num_elements
-    #     if UInt32(row_len) < max_vector_length:
-    #         for i in range(max_vector_length - row_len):
-    #             row[].compressed_all_text.append(0)
-    #     elif UInt32(row_len) > max_vector_length:
-    #         raise Error('vector of row is larger than related var somehow')
-    return yahoo_dataset
+        return yahoo_dataset

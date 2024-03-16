@@ -2,3 +2,8 @@
 	path = zlib
 	url = https://github.com/madler/zlib
 	ignore = all
+
+[submodule "gzip-example"]
+	path = gzip-example
+	url = https://github.com/Sonictherocketman/gzip-classifier.git
+	ignore = all
