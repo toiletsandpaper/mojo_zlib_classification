@@ -3,7 +3,7 @@ all: zlib_dylib yahoo_download build
 zlib_dylib:
 ifeq ($(wildcard *.dylib *.so),)
 	cd zlib && sh ./configure && make all
-	mv ./zlib/libz.dylib .
+	mv $(wildcard *.dylib *.so) .
 	cd zlib && make clean
 else
 	@echo "$(wildcard *.dylib *.so) found, skipping building zlib"
@@ -11,7 +11,7 @@ endif
 
 yahoo_download:
 ifeq ($(wildcard datasets/*_train.csv), $(wildcard datasets/*_test.csv))
-	python3 download_dataset.py
+	python3 datasets/download_dataset.py
 else
 	@echo "$(wildcard datasets/*_train.csv) and $(wildcard datasets/*_test.csv) found, skip downloading again"
 endif
