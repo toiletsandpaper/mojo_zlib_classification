@@ -25,7 +25,7 @@ struct IntKey(KeyElement, Intable):
         return self.value
 
 fn calc_distance(text1: CompressedText, text2: CompressedText) raises -> Float64:
-    var combined_text: String = text1.text + text2.text
+    var combined_text: String = text1.text + ' ' + text2.text
     var combined = compress(combined_text)
     #print(text1.text, text2.text)
     return (len(combined) - math.min(len(text1), len(text2))) / math.max(len(text1), len(text2))
