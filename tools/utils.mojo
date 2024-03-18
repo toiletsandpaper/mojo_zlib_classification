@@ -27,12 +27,15 @@ struct IntKey(KeyElement, Intable):
 fn calc_distance(text1: CompressedText, text2: CompressedText) raises -> Float64:
     var combined_text: String = text1.text + ' ' + text2.text
     var combined = compress(combined_text)
+    var res = (len(combined) - math.min(len(text1), len(text2))) / math.max(len(text1), len(text2))
+    #print(str(text1), str(text2), str(combined), res)
     #print(text1.text, text2.text)
-    return (len(combined) - math.min(len(text1), len(text2))) / math.max(len(text1), len(text2))
+    return res
 
 fn quicksort(array: DynamicVector[CompressedText[]], by_distance: Optional[CompressedText[]] = None) raises -> DynamicVector[CompressedText[]]:
     if len(array) <= 1:
-            return array
+        #print('array 1')#, array[0])
+        return array
     var left = DynamicVector[CompressedText[]]()
     var middle = DynamicVector[CompressedText[]]()
     var right = DynamicVector[CompressedText[]]()
@@ -54,9 +57,10 @@ fn quicksort(array: DynamicVector[CompressedText[]], by_distance: Optional[Compr
     else:
         var pivot = calc_distance(array[len(array) // 2], by_distance.value())
         for x in array:
-            if calc_distance(x[], by_distance.value()) < pivot:
+            var distance = calc_distance(x[], by_distance.value())
+            if distance < pivot:
                 left.append(x[])
-            elif calc_distance(x[], by_distance.value()) == pivot:
+            elif distance == pivot:
                 middle.append(x[])
             else:
                 right.append(x[])
@@ -65,6 +69,48 @@ fn quicksort(array: DynamicVector[CompressedText[]], by_distance: Optional[Compr
         left.extend(quicksort(right, by_distance.value()))
         #right = quicksort(right)
         return left
+
+fn merge(left: DynamicVector[CompressedText[]], right: DynamicVector[CompressedText[]], by_distance: Optional[CompressedText[]] = None) raises -> DynamicVector[CompressedText[]]:
+    var result = DynamicVector[CompressedText[]]()
+    var i = 0
+    var j = 0
+    while i < len(left) and j < len(right):
+        if not by_distance:
+            if len(left[i]) < len(right[j]):
+                result.append(left[i])
+                i += 1
+            else:
+                result.append(right[j])
+                j += 1
+        else:
+            if calc_distance(left[i], by_distance.value()) < calc_distance(right[j], by_distance.value()):
+                result.append(left[i])
+                i += 1
+            else:
+                result.append(right[j])
+                j += 1
+    while i < len(left):
+        result.append(left[i])
+        i += 1
+    while j < len(right):
+        result.append(right[j])
+        j += 1
+    return result
+
+fn merge_sort(array: DynamicVector[CompressedText[]], by_distance: Optional[CompressedText[]] = None) raises -> DynamicVector[CompressedText[]]:
+    if len(array) <= 1:
+        return array
+    var middle = len(array) // 2
+    var left = DynamicVector[CompressedText[]]()
+    var right = DynamicVector[CompressedText[]]()
+    for i in range(middle):
+        left.append(array[i])
+    for i in range(middle, len(array)):
+        right.append(array[i])
+    left = merge_sort(left, by_distance)
+    right = merge_sort(right, by_distance)
+    return merge(left, right, by_distance)
+    
 
 fn get_most_common(sorted_array: DynamicVector[CompressedText[]], top_k: Int = 10) raises -> CompressedText:    
     var k = math.min(top_k, len(sorted_array))
@@ -125,7 +171,7 @@ fn main() raises:
     #     get_most_common(quicksort(array, text))
     # )
 
-    var sorted = quicksort(array, text)
+    var sorted = merge_sort(array, text)
     for item in sorted:
         print(item[].text, len(item[]), calc_distance(item[], text))
 
