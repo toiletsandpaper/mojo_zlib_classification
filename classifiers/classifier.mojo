@@ -1,4 +1,7 @@
 from collections.optional import Optional
+from collections.vector import InlinedFixedVector
+from sys.info import num_performance_cores
+from algorithm import parallelize, sync_parallelize, async_parallelize
 
 from classifiers.base import BaseClassifier
 from tools.utils import get_most_common, quicksort, merge_sort
@@ -36,12 +39,22 @@ struct Classifier:
         #print('Got most common' + str(most_common))
         return most_common
 
+    @always_inline
     fn classify_bulk(self, texts: DynamicVector[CompressedText[]], k: Optional[Int] = None) raises -> DynamicVector[CompressedText[]]:
         var results = DynamicVector[CompressedText[]]()
-        var counter = 0
-        for text in texts:
-            print_no_newline(str(counter / len(texts) * 100) + "%               \r")
-            results.append(self.classify(text[], k))
-            counter = counter + 1
+        var placeholder = compress('error')
+        placeholder.label = str(-1)
+        #results.resize(len(texts), placeholder)
+
+        @parameter
+        fn _classify(i: Int):
+            try:
+                #results[i] = self.classify(texts[i], k)
+                results.append(self.classify(texts[i], k))
+            except:
+                #results[i] = placeholder
+                results.append(placeholder)
+
+        parallelize[_classify](len(texts))
         print()
         return results

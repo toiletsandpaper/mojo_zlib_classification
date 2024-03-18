@@ -9,5 +9,5 @@ def split_dataset(dataset: pd.DataFrame, test_size: float = 0.5) -> tuple:
 if __name__ == '__main__':
     data = pd.read_csv('yahoo_test.csv', header=None)
     train, test = split_dataset(data)
-    train.head(5000).to_csv('train.csv', index=False, header=False)
-    test.head(1000).to_csv('test.csv', index=False, header=False)
+    train.head(500).to_csv('train.csv', index=False, header=False)
+    test.head(10).to_csv('test.csv', index=False, header=False)
