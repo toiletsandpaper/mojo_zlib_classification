@@ -1,6 +1,9 @@
 from sys import ffi, external_call
 from memory import memset_zero, memset
 from memory.anypointer import AnyPointer
+from collections.optional import Optional
+
+from tools.gzip_python import CompressedText
 
 alias ZLibPath: String = "libz.dylib"
 
@@ -49,7 +52,7 @@ fn log_zlib_result(Z_RES: Int, compressing: Bool = True, log_ok: Bool = True) ra
         raise Error("ERROR " + prefix.upper() + "COMPRESSING: Unhandled exception. Return code:" + str(Z_RES))
 
 
-fn compress(text: String, logging: Bool = False) raises -> ZlibResultType:
+fn compress(text: String, logging: Bool) raises -> ZlibResultType:
     var data_memory_amount: Int = len(text) * 3
     var handle = ffi.DLHandle(ZLibPath)
     var zlib_compress = handle.get_function[zlib_type_compress]("compress")
@@ -71,6 +74,62 @@ fn compress(text: String, logging: Bool = False) raises -> ZlibResultType:
     log_zlib_result(Z_RES, log_ok=logging)
     handle.close()
     return Tuple(compressed, compressed_len)
+
+fn compress[tensor_len: Int = 2048](text: String) raises -> CompressedText:
+    var data_memory_amount: Int = len(text) * 3
+    var handle = ffi.DLHandle(ZLibPath)
+    var zlib_compress = handle.get_function[zlib_type_compress]("compress")
+
+    var compressed = Pointer[Bytef].alloc(data_memory_amount)
+    var compressed_len = Pointer[uLong].alloc(1)
+    memset_zero(compressed, data_memory_amount)
+    memset_zero(compressed_len, 1)
+    compressed_len[0] = data_memory_amount
+
+    var text_bytes = text.as_bytes()
+
+    var Z_RES = zlib_compress(
+        compressed,
+        compressed_len,
+        text_bytes.steal_data(),
+        len(text) + 1,
+    )
+    handle.close()
+
+    # var compressed_tensor = Tensor[DType.int16](tensor_len)
+    # for i in range(compressed_len.load(0).to_int()):
+    #     compressed_tensor[i] = compressed[i].to_int()
+    # var res = CompressedText[DType.int16](text, compressed_tensor, compressed_len.load(0).to_int())
+    var res = CompressedText[DType.int16](text, compressed_len.load(0).to_int())
+    return res
+
+fn compress[tensor_len: Int = 2048](text: String, zlib_compress: zlib_type_compress) raises -> CompressedText:
+    var data_memory_amount: Int = len(text) * 3
+
+    var compressed = Pointer[Bytef].alloc(data_memory_amount)
+    var compressed_len = Pointer[uLong].alloc(1)
+    memset_zero(compressed, data_memory_amount)
+    memset_zero(compressed_len, 1)
+    compressed_len[0] = data_memory_amount
+
+    var text_bytes = text.as_bytes()
+
+    var Z_RES = zlib_compress(
+        compressed,
+        compressed_len,
+        text_bytes.steal_data(),
+        len(text) + 1,
+    )
+
+    # if compressed_len.load(0).to_int() > tensor_len:
+    #     raise Error("Compressed data is too big for provided tensor")
+
+    # var compressed_tensor = Tensor[DType.int16](tensor_len)
+    # for i in range(compressed_len.load(0).to_int()):
+    #     compressed_tensor[i] = compressed[i].to_int()
+    # var res = CompressedText[DType.int16](text, compressed_tensor, compressed_len.load(0).to_int())
+    var res = CompressedText[DType.int16](text, compressed_len.load(0).to_int())
+    return res
 
 
 fn uncompress(data: DynamicVector[Int8], logging: Bool = False) raises -> String:
@@ -103,15 +162,17 @@ fn uncompress(data: DynamicVector[Int8], logging: Bool = False) raises -> String
 
 fn main() raises:
     var text = "test teeeeeeeeeeext"
-    var res = compress(text)
-    var res_data_pointer = res.get[0, Pointer[Bytef]]()
-    var res_len = res.get[1, Pointer[uLong]]().load(0)
-    var res_data = DynamicVector[Bytef]()
-    print_no_newline("compressed data is ")
-    for i in range(res_len):
-        res_data.append(res_data_pointer.load(i))
-        print_no_newline(hex(res_data[i]))
-    print("\ncompressed lenght is " + String(res_len) + "\n")
+    var res: CompressedText = compress[50](text)
+    print(res)
 
-    var uncompressed = uncompress(res_data)
-    print("uncompressed string: " + uncompressed)
+    # var res_data_pointer = res.get[0, Pointer[Bytef]]()
+    # var res_len = res.get[1, Pointer[uLong]]().load(0)
+    # var res_data = DynamicVector[Bytef]()
+    # print_no_newline("compressed data is ")
+    # for i in range(res_len):
+    #     res_data.append(res_data_pointer.load(i))
+    #     print_no_newline(hex(res_data[i]))
+    # print("\ncompressed lenght is " + String(res_len) + "\n")
+
+    # var uncompressed = uncompress(res_data)
+    # print("uncompressed string: " + uncompressed)

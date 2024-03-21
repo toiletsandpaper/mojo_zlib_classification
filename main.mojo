@@ -1,21 +1,27 @@
 #!/usr/bin/env mojo
-from tools.gzip_python import compress
+from sys import ffi
+from tools.zlib import zlib_type_compress
 from classifiers.classifier import Classifier
 from datasets.yahoo_gzip import load_dataset
 
 
 fn main() raises:
-    var data_train = load_dataset('datasets/train.csv')
-    var data_test = load_dataset('datasets/test.csv')
+    var handle = ffi.DLHandle('libz.dylib')
+    var zlib_compress = handle.get_function[zlib_type_compress]("compress")
 
-    var classifier = Classifier()
+    var data_train = load_dataset('datasets/yahoo_train.csv', zlib_compress)
+    var data_test = load_dataset('datasets/yahoo_test.csv', zlib_compress)
+
+    var classifier = Classifier(zlib_compress)
     classifier.train(data_train)
     
     # print(
     #     classifier.classify(compress('I am a good'))
     # )
 
-    var preds = classifier.classify_bulk(data_test)
+    var preds = classifier.classify_bulk(data_test, k=1)
+
+    handle.close()
 
     var hits =  0
     for i in range(len(preds)):

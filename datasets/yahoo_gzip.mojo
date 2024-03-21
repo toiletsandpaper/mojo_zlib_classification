@@ -1,7 +1,9 @@
 from pathlib import Path
-from tools.gzip_python import compress, CompressedText
+#from tools.gzip_python import compress, 
+from tools.gzip_python import CompressedText
+from tools.zlib import compress, zlib_type_compress
 
-fn load_dataset(yahoo_path: Path) raises -> DynamicVector[CompressedText[]]:
+fn load_dataset(yahoo_path: Path, compressor: zlib_type_compress) raises -> DynamicVector[CompressedText[]]:
     var yahoo_dataset = DynamicVector[CompressedText[]]()
     with open(yahoo_path, "r") as file:
         print('Started loading', yahoo_path, 'file')
@@ -26,8 +28,11 @@ fn load_dataset(yahoo_path: Path) raises -> DynamicVector[CompressedText[]]:
                 
                 var text = String(' ').join(topic, question_title, question_content, best_answer)
                 
-                var compressed_text = compress(text)
+                var compressed_text = compress(text, compressor)
                 compressed_text.label = topic
+
+                # if len(compressed_text) > compressed_text.tensor.num_elements():
+                #     raise Error('compressed_text length is greater than tensor num_elements')
 
                 yahoo_dataset.append(compressed_text)
             except err: 

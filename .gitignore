@@ -70,3 +70,6 @@ zlib_test.py
 
 # mojo packages
 tools/stringbuilder.mojo
+
+# macos
+.DS_Store
