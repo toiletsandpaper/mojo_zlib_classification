@@ -40,6 +40,7 @@ clean:
 	rm -rf build
 	rm -f *.dylib *.so
 	rm -f datasets/*.csv
+	rm -f tools/stringbuilder.mojo
 
 love:
 	@echo not war
