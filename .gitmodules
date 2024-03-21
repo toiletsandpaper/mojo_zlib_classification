@@ -7,3 +7,8 @@
 	path = gzip-example
 	url = https://github.com/Sonictherocketman/gzip-classifier.git
 	ignore = all
+
+[submodule "mojo_stringbuilder"]
+	path = mojo_stringbuilder
+	url = https://github.com/maniartech/mojo-stringbuilder.git
+	ignore = all

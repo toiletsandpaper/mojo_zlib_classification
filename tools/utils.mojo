@@ -3,6 +3,8 @@ from algorithm.sort import sort
 from collections.optional import Optional
 from collections.dict import Dict
 
+from tools.stringbuilder import StringBuilder
+
 struct IntKey(KeyElement, Intable):
     var value: Int
 
@@ -25,11 +27,14 @@ struct IntKey(KeyElement, Intable):
         return self.value
 
 fn calc_distance(text1: CompressedText, text2: CompressedText) raises -> Float64:
-    var combined_text: String = text1.text + ' ' + text2.text
-    var combined = compress(combined_text)
+    var combined_text = StringBuilder()
+    combined_text.append(text1.text) 
+    combined_text.append(' ') 
+    combined_text.append(text2.text)
+    var combined = compress(str(combined_text))
+    # var combined_text: String = text1.text + ' ' + text2.text
+    # var combined = compress(combined_text)
     var res = (len(combined) - math.min(len(text1), len(text2))) / math.max(len(text1), len(text2))
-    #print(str(text1), str(text2), str(combined), res)
-    #print(text1.text, text2.text)
     return res
 
 fn quicksort(array: DynamicVector[CompressedText[]], by_distance: Optional[CompressedText[]] = None) raises -> DynamicVector[CompressedText[]]:
@@ -67,7 +72,7 @@ fn quicksort(array: DynamicVector[CompressedText[]], by_distance: Optional[Compr
         left = quicksort(left, by_distance.value())
         left.extend(middle)
         left.extend(quicksort(right, by_distance.value()))
-        #right = quicksort(right)
+        # print(len(left))
         return left
 
 fn merge(left: DynamicVector[CompressedText[]], right: DynamicVector[CompressedText[]], by_distance: Optional[CompressedText[]] = None) raises -> DynamicVector[CompressedText[]]:

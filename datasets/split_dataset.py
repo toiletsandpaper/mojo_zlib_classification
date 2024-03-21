@@ -3,11 +3,11 @@ from sklearn.model_selection import train_test_split
 
 def split_dataset(dataset: pd.DataFrame, test_size: float = 0.5) -> tuple:
     """Split the dataset into training and testing sets."""
-    train, test = train_test_split(dataset, test_size=test_size)
+    train, test = train_test_split(dataset, test_size=test_size, random_state=42)
     return train, test
 
 if __name__ == '__main__':
-    data = pd.read_csv('yahoo_test.csv', header=None)
+    data = pd.read_csv('datasets/yahoo_test.csv', header=None)
     train, test = split_dataset(data)
-    train.head(5000).to_csv('train.csv', index=False, header=False)
-    test.head(1000).to_csv('test.csv', index=False, header=False)
+    train.head(5000).to_csv('datasets/train.csv', index=False, header=False)
+    test.head(500).to_csv('datasets/test.csv', index=False, header=False)

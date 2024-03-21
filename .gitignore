@@ -67,3 +67,6 @@ zlib_test.py
 
 # datasets
 *.csv
+
+# mojo packages
+tools/stringbuilder.mojo

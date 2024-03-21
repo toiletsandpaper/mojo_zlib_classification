@@ -43,5 +43,6 @@ struct Classifier:
             print_no_newline(str(counter / len(texts) * 100) + "%               \r")
             results.append(self.classify(text[], k))
             counter = counter + 1
+        print('100% All text classified')
         print()
         return results
