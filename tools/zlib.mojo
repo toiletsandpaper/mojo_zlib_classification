@@ -101,6 +101,8 @@ fn compress[tensor_len: Int = 2048](text: String) raises -> CompressedText:
     #     compressed_tensor[i] = compressed[i].to_int()
     # var res = CompressedText[DType.int16](text, compressed_tensor, compressed_len.load(0).to_int())
     var res = CompressedText[DType.int16](text, compressed_len.load(0).to_int())
+    compressed.free()
+    compressed_len.free()
     return res
 
 fn compress[tensor_len: Int = 2048](text: String, zlib_compress: zlib_type_compress) raises -> CompressedText:
@@ -129,6 +131,8 @@ fn compress[tensor_len: Int = 2048](text: String, zlib_compress: zlib_type_compr
     #     compressed_tensor[i] = compressed[i].to_int()
     # var res = CompressedText[DType.int16](text, compressed_tensor, compressed_len.load(0).to_int())
     var res = CompressedText[DType.int16](text, compressed_len.load(0).to_int())
+    compressed.free()
+    compressed_len.free()
     return res
 
 
