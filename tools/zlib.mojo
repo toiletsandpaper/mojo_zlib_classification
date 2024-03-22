@@ -1,6 +1,5 @@
 from sys import ffi, external_call
 from memory import memset_zero, memset
-from memory.anypointer import AnyPointer
 from collections.optional import Optional
 
 from tools.gzip_python import CompressedText
@@ -106,6 +105,11 @@ fn compress[tensor_len: Int = 2048](borrowed text: String) raises -> CompressedT
     compressed_len.free()
     text_bytes_ptr.free()
     text_bytes.data.free()
+    text_bytes.__del__()
+    text_bytes_ptr.__del__()
+    compressed.__del__()
+    compressed_len.__del__()
+    data_memory_amount.__del__()
     return res
 
 fn compress[tensor_len: Int = 2048](borrowed text: String, borrowed zlib_compress: zlib_type_compress) raises -> CompressedText:
@@ -140,6 +144,11 @@ fn compress[tensor_len: Int = 2048](borrowed text: String, borrowed zlib_compres
     compressed_len.free()
     text_bytes_ptr.free()
     text_bytes.data.free()
+    text_bytes.__del__()
+    text_bytes_ptr.__del__()
+    compressed.__del__()
+    compressed_len.__del__()
+    data_memory_amount.__del__()
     return res
 
 
