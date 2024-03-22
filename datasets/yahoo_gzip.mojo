@@ -3,7 +3,7 @@ from pathlib import Path
 from tools.gzip_python import CompressedText
 from tools.zlib import compress, zlib_type_compress
 
-fn load_dataset(yahoo_path: Path, compressor: zlib_type_compress) raises -> DynamicVector[CompressedText[]]:
+fn load_dataset(yahoo_path: Path, borrowed compressor: zlib_type_compress) raises -> DynamicVector[CompressedText[]]:
     var yahoo_dataset = DynamicVector[CompressedText[]]()
     with open(yahoo_path, "r") as file:
         print('Started loading', yahoo_path, 'file')
@@ -37,4 +37,6 @@ fn load_dataset(yahoo_path: Path, compressor: zlib_type_compress) raises -> Dyna
                 yahoo_dataset.append(compressed_text)
             except err: 
                 print('\nSkipping line; Error:', str(err))
+            finally:
+                readed = readed + 1
     return yahoo_dataset

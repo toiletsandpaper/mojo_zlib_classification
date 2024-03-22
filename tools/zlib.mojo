@@ -75,7 +75,7 @@ fn compress(text: String, logging: Bool) raises -> ZlibResultType:
     handle.close()
     return Tuple(compressed, compressed_len)
 
-fn compress[tensor_len: Int = 2048](text: String) raises -> CompressedText:
+fn compress[tensor_len: Int = 2048](borrowed text: String) raises -> CompressedText:
     var data_memory_amount: Int = len(text) * 3
     var handle = ffi.DLHandle(ZLibPath)
     var zlib_compress = handle.get_function[zlib_type_compress]("compress")
@@ -108,7 +108,7 @@ fn compress[tensor_len: Int = 2048](text: String) raises -> CompressedText:
     text_bytes.data.free()
     return res
 
-fn compress[tensor_len: Int = 2048](text: String, zlib_compress: zlib_type_compress) raises -> CompressedText:
+fn compress[tensor_len: Int = 2048](borrowed text: String, borrowed zlib_compress: zlib_type_compress) raises -> CompressedText:
     var data_memory_amount: Int = len(text) * 3
 
     var compressed = Pointer[Bytef].alloc(data_memory_amount)
