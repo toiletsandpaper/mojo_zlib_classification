@@ -87,11 +87,12 @@ fn compress[tensor_len: Int = 2048](text: String) raises -> CompressedText:
     compressed_len[0] = data_memory_amount
 
     var text_bytes = text.as_bytes()
+    var text_bytes_ptr = text_bytes.steal_data()
 
     var Z_RES = zlib_compress(
         compressed,
         compressed_len,
-        text_bytes.steal_data(),
+        text_bytes_ptr,
         len(text) + 1,
     )
     handle.close()
@@ -103,6 +104,8 @@ fn compress[tensor_len: Int = 2048](text: String) raises -> CompressedText:
     var res = CompressedText[DType.int16](text, compressed_len.load(0).to_int())
     compressed.free()
     compressed_len.free()
+    text_bytes_ptr.free()
+    text_bytes.data.free()
     return res
 
 fn compress[tensor_len: Int = 2048](text: String, zlib_compress: zlib_type_compress) raises -> CompressedText:
@@ -114,12 +117,14 @@ fn compress[tensor_len: Int = 2048](text: String, zlib_compress: zlib_type_compr
     memset_zero(compressed_len, 1)
     compressed_len[0] = data_memory_amount
 
+
     var text_bytes = text.as_bytes()
+    var text_bytes_ptr = text_bytes.steal_data()
 
     var Z_RES = zlib_compress(
         compressed,
         compressed_len,
-        text_bytes.steal_data(),
+        text_bytes_ptr,
         len(text) + 1,
     )
 
@@ -133,6 +138,8 @@ fn compress[tensor_len: Int = 2048](text: String, zlib_compress: zlib_type_compr
     var res = CompressedText[DType.int16](text, compressed_len.load(0).to_int())
     compressed.free()
     compressed_len.free()
+    text_bytes_ptr.free()
+    text_bytes.data.free()
     return res
 
 
